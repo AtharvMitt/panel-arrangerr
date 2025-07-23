@@ -9,11 +9,59 @@ function clamp(val, min, max) {
 }
 
 const WorkspacePanelArranger = () => {
-  const [workspaceWidth, setWorkspaceWidth] = useState(1220);
-  const [workspaceHeight, setWorkspaceHeight] = useState(2440);
-  const [spacing, setSpacing] = useState(2);
+  const PANELS_STORAGE_KEY = "workspace_panels_v1";
+  const WORKSPACE_SETTINGS_KEY = "workspace_settings_v1";
+  const SPACING_STORAGE_KEY = "workspace_spacing_v1";
+  const [workspaceWidth, setWorkspaceWidth] = useState(() => {
+    try {
+      const saved = localStorage.getItem(WORKSPACE_SETTINGS_KEY);
+      return saved ? JSON.parse(saved).width : 1220;
+    } catch {
+      return 1220;
+    }
+  });
+  const [workspaceHeight, setWorkspaceHeight] = useState(() => {
+    try {
+      const saved = localStorage.getItem(WORKSPACE_SETTINGS_KEY);
+      return saved ? JSON.parse(saved).height : 2440;
+    } catch {
+      return 2440;
+    }
+  });
 
-  const [panels, setPanels] = useState([]);
+  useEffect(() => {
+  localStorage.setItem(
+    WORKSPACE_SETTINGS_KEY,
+    JSON.stringify({ width: workspaceWidth, height: workspaceHeight })
+  );
+  }, [workspaceWidth, workspaceHeight]);
+
+  const [spacing, setSpacing] = useState(() => {
+    try {
+      const saved = localStorage.getItem(SPACING_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : 2;
+    } catch {
+      return 2;
+    }
+  });
+
+  useEffect(() => {
+  localStorage.setItem(SPACING_STORAGE_KEY, JSON.stringify(spacing));
+  }, [spacing]);
+
+  const [panels, setPanels] = useState(() => {
+    try {
+      const saved = localStorage.getItem(PANELS_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+  localStorage.setItem(PANELS_STORAGE_KEY, JSON.stringify(panels));
+  }, [panels]);
+
   const [newPanelWidth, setNewPanelWidth] = useState('');
   const [newPanelHeight, setNewPanelHeight] = useState('');
   const [newPanelName, setNewPanelName] = useState('');
@@ -134,6 +182,9 @@ const WorkspacePanelArranger = () => {
         </button>
         <button onClick={() => setPanelFontSize(f => Math.min(64, f + 2))} style={{ marginLeft: 8 }}>
           A+
+        </button>
+        <button onClick={() => setPanels([])}>
+          Clear Workspace
         </button>
       </div>
 
