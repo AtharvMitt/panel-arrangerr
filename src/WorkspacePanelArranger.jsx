@@ -129,8 +129,24 @@ export default function WorkspacePanelArranger() {
     setCurrent(label);
   };
 
+  const renameWorkspace = (oldName, newName) => {
+  if (!newName || newName === oldName || workspaces[newName]) return;
+
+  setWorkspaces((prev) => {
+    const updated = { ...prev };
+      updated[newName] = { ...updated[oldName], name: newName };
+      delete updated[oldName];
+      return updated;
+    });
+
+    if (current === oldName) setCurrent(newName);
+  };
+
+  const [editingWorkspace, setEditingWorkspace] = useState(null);
+  const [newWorkspaceName, setNewWorkspaceName] = useState("");
   // 5. Font size (global, but can be made per-workspace)
   const [panelFontSize, setPanelFontSize] = useState(16);
+  const [panelSizeSize, setPanelSizeSize] = useState(12);
 
   // For creating panels
   const [newPanelWidth, setNewPanelWidth] = useState("");
@@ -147,22 +163,61 @@ export default function WorkspacePanelArranger() {
       {/* Workspace Tabs */}
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
         {Object.entries(workspaces).map(([name, obj]) => (
-          <button
-            key={name}
-            style={{
-              background: name === current ? "#174ea6" : "#ddd",
-              color: name === current ? "#fff" : "#222",
-              border: "none",
-              borderRadius: 4,
-              padding: "4px 10px",
-              fontWeight: name === current ? "bold" : "normal",
-              cursor: "pointer",
-            }}
-            onClick={() => setCurrent(name)}
-            title={name}
-          >
-            {name}
-          </button>
+          <div key={name} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            {editingWorkspace === name ? (
+              <>
+                <input
+                  type="text"
+                  value={newWorkspaceName}
+                  onChange={(e) => setNewWorkspaceName(e.target.value)}
+                  style={{ width: 100 }}
+                />
+                <button
+                  onClick={() => {
+                    renameWorkspace(name, newWorkspaceName);
+                    setEditingWorkspace(null);
+                  }}
+                >
+                  ✅
+                </button>
+                <button onClick={() => setEditingWorkspace(null)}>❌</button>
+              </>
+            ) : (
+              <>
+                <button
+                  style={{
+                    background: name === current ? "#174ea6" : "#ddd",
+                    color: name === current ? "#fff" : "#222",
+                    border: "none",
+                    borderRadius: 4,
+                    padding: "4px 10px",
+                    fontWeight: name === current ? "bold" : "normal",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => setCurrent(name)}
+                  title={name}
+                >
+                  {name}
+                </button>
+                <button
+                  title="Rename workspace"
+                  onClick={() => {
+                    setEditingWorkspace(name);
+                    setNewWorkspaceName(name);
+                  }}
+                  style={{
+                    background: "#ccc",
+                    border: "none",
+                    borderRadius: 4,
+                    padding: "0px 6px",
+                    cursor: "pointer",
+                  }}
+                >
+                  ✏️
+                </button>
+              </>
+            )}
+          </div>
         ))}
         <button
           onClick={createNewWorkspace}
@@ -261,6 +316,15 @@ export default function WorkspacePanelArranger() {
           Clear Workspace
         </button>
       </div>
+      <div style={{ marginBottom: 16 }}>
+        <button onClick={() => setPanelSizeSize((f) => Math.max(8, f - 2))}>A-</button>
+        <button
+          onClick={() => setPanelSizeSize((f) => Math.min(64, f + 2))}
+          style={{ marginLeft: 8 }}
+        >
+          A+
+        </button>
+        </div>
       {/* Workspace display */}
       <div
         ref={workspaceRef}
@@ -285,6 +349,7 @@ export default function WorkspacePanelArranger() {
             allPanels={ws.panels}
             deletePanel={deletePanel}
             panelFontSize={panelFontSize}
+            panelSizeSize = {panelSizeSize}
             workspaceSize={{ width: ws.width, height: ws.height }}
             workspaceRef={workspaceRef}
           />
@@ -303,6 +368,7 @@ function DraggablePanel({
   allPanels,
   deletePanel,
   panelFontSize,
+  panelSizeSize,
   workspaceSize,
   workspaceRef,
 }) {
@@ -501,10 +567,10 @@ function DraggablePanel({
       <div
         style={{
           position: "absolute",
-          top: 2,
+          bottom: "-5px",
           left: "50%",
           transform: "translateX(-50%)",
-          fontSize: "0.7em",
+          fontSize: panelSizeSize,
           opacity: 0.8,
           pointerEvents: "none",
           fontWeight: "bold",
@@ -516,10 +582,10 @@ function DraggablePanel({
       <div
         style={{
           position: "absolute",
-          left: 2,
+          left: "-5px",
           top: "50%",
           transform: "translateY(-50%) rotate(-90deg)",
-          fontSize: "0.7em",
+          fontSize: panelSizeSize,
           opacity: 0.8,
           pointerEvents: "none",
           fontWeight: "bold",
