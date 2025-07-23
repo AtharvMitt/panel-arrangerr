@@ -430,6 +430,8 @@ const DraggablePanel = ({
         fontWeight: "bold",
         pointerEvents: "none",
         zIndex: 1,
+        transform: panel.width >= panel.height ? 'none' : 'rotate(-90deg)',
+        whiteSpace: 'nowrap'
       }}
     >
       {panel.name || panel.id}
