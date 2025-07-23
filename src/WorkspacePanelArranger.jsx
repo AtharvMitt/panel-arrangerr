@@ -142,6 +142,10 @@ export default function WorkspacePanelArranger() {
     if (current === oldName) setCurrent(newName);
   };
 
+  useEffect(() => {
+    setHighlightedPanelId(null);
+  }, [current]);
+
   const [editingWorkspace, setEditingWorkspace] = useState(null);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
   // 5. Font size (global, but can be made per-workspace)
@@ -152,6 +156,7 @@ export default function WorkspacePanelArranger() {
   const [newPanelWidth, setNewPanelWidth] = useState("");
   const [newPanelHeight, setNewPanelHeight] = useState("");
   const [newPanelName, setNewPanelName] = useState("");
+  const [highlightedPanelId, setHighlightedPanelId] = useState(null);
 
   const workspaceRef = useRef(null);
 
@@ -326,34 +331,82 @@ export default function WorkspacePanelArranger() {
         </button>
         </div>
       {/* Workspace display */}
-      <div
-        ref={workspaceRef}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 40 }}>
+        {/* Workspace display */}
+        <div
+          ref={workspaceRef}
+          style={{
+            position: "relative",
+            border: "2px solid black",
+            width: ws.width / SCALE,
+            height: ws.height / SCALE,
+            marginTop: 20,
+            backgroundColor: "#f5f5f5",
+            overflow: "visible",
+          }}
+        >
+          {ws.panels.map((panel) => (
+            <DraggablePanel
+              key={panel.id}
+              panel={panel}
+              spacing={ws.spacing}
+              scale={SCALE}
+              updatePosition={updatePanelPosition}
+              rotateAndClampPanel={rotateAndClampPanel}
+              allPanels={ws.panels}
+              deletePanel={deletePanel}
+              panelFontSize={panelFontSize}
+              panelSizeSize={panelSizeSize}
+              workspaceSize={{ width: ws.width, height: ws.height }}
+              workspaceRef={workspaceRef}
+              highlighted={panel.id === highlightedPanelId}
+            />
+          ))}
+        </div>
+
+        {/* --- Panel Table (NEW) --- */}
+        <div style={{ minWidth: 250 }}>
+          <h3 style={{ marginBottom: 8 }}>Panels in Current Workspace</h3>
+          <table style={{
+            borderCollapse: "collapse",
+            width: "100%",
+            background: "#fff",
+            border: "1px solid #333",
+            fontSize: 15
+          }}>
+            <thead>
+              <tr style={{ background: "black" }}>
+                <th style={{ border: "1px solid #888", padding: "4px 8px" }}>Name</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px" }}>Width (mm)</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px" }}>Height (mm)</th>
+              </tr>
+            </thead>
+            <tbody>
+  {ws.panels.length === 0 ? (
+    <tr>
+      <td colSpan={3} style={{ textAlign: "center", color: "#aaa", padding: 10 }}>
+        — No panels —
+      </td>
+    </tr>
+  ) : (
+    ws.panels.map((panel) => (
+      <tr
+        key={panel.id}
         style={{
-          position: "relative",
-          border: "2px solid black",
-          width: ws.width / SCALE,
-          height: ws.height / SCALE,
-          marginTop: 20,
-          backgroundColor: "#f5f5f5",
-          overflow: "visible",
+          background: panel.id === highlightedPanelId ? "#fff3cd" : undefined,
+          cursor: "pointer",
         }}
+        onClick={() => setHighlightedPanelId(panel.id)}
       >
-        {ws.panels.map((panel) => (
-          <DraggablePanel
-            key={panel.id}
-            panel={panel}
-            spacing={ws.spacing}
-            scale={SCALE}
-            updatePosition={updatePanelPosition}
-            rotateAndClampPanel={rotateAndClampPanel}
-            allPanels={ws.panels}
-            deletePanel={deletePanel}
-            panelFontSize={panelFontSize}
-            panelSizeSize = {panelSizeSize}
-            workspaceSize={{ width: ws.width, height: ws.height }}
-            workspaceRef={workspaceRef}
-          />
-        ))}
+        <td style={{ border: "1px solid #aaa", padding: "3px 8px", color: "black" }}>{panel.name || panel.id}</td>
+        <td style={{ border: "1px solid #aaa", padding: "3px 8px", textAlign: "right", color: "black" }}>{panel.width}</td>
+        <td style={{ border: "1px solid #aaa", padding: "3px 8px", textAlign: "right", color: "black" }}>{panel.height}</td>
+      </tr>
+    ))
+  )}
+</tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -371,6 +424,7 @@ function DraggablePanel({
   panelSizeSize,
   workspaceSize,
   workspaceRef,
+  highlighted
 }) {
   const ref = useRef(null);
   const [dragging, setDragging] = useState(false);
@@ -516,7 +570,13 @@ function DraggablePanel({
         width: panel.width / scale,
         height: panel.height / scale,
         backgroundColor:
-          anyOverlap || outOfBounds ? "#f44336" : dragging ? "#219ebc" : "#8ecae6",
+          highlighted
+            ? "orange"
+            : anyOverlap || outOfBounds
+            ? "#f44336"
+            : dragging
+            ? "#219ebc"
+            : "#8ecae6",
         border: "2px solid #023047",
         boxSizing: "border-box",
         cursor: "move",
