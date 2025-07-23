@@ -17,6 +17,7 @@ const WorkspacePanelArranger = () => {
   const [newPanelWidth, setNewPanelWidth] = useState('');
   const [newPanelHeight, setNewPanelHeight] = useState('');
   const [newPanelName, setNewPanelName] = useState('');
+  const [panelFontSize, setPanelFontSize] = useState(16);
 
   const workspaceRef = useRef(null);
 
@@ -127,6 +128,16 @@ const WorkspacePanelArranger = () => {
         <button onClick={addPanel}>Add Panel</button>
       </div>
 
+      <div style={{ marginBottom: 16 }}>
+        <button onClick={() => setPanelFontSize(f => Math.max(8, f - 2))}>
+          A-
+        </button>
+        <button onClick={() => setPanelFontSize(f => Math.min(64, f + 2))} style={{ marginLeft: 8 }}>
+          A+
+        </button>
+      </div>
+
+
       <div
         ref={workspaceRef}
         style={{
@@ -149,6 +160,7 @@ const WorkspacePanelArranger = () => {
             rotatePanel={rotatePanel}
             allPanels={panels}
             deletePanel={deletePanel}
+            panelFontSize={panelFontSize}
             workspaceSize={{ width: workspaceWidth, height: workspaceHeight }}
             workspaceRef={workspaceRef}
           />
@@ -166,6 +178,7 @@ const DraggablePanel = ({
   rotatePanel,
   allPanels,
   deletePanel,
+  panelFontSize,
   workspaceSize,
   workspaceRef
 }) => {
@@ -426,7 +439,7 @@ const DraggablePanel = ({
     <div
       style={{
         textAlign: 'center',
-        fontSize: "1em",
+        fontSize: panelFontSize,
         fontWeight: "bold",
         pointerEvents: "none",
         zIndex: 1,
