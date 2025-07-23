@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 
 const SCALE = 5;
-const SNAP_THRESHOLD_PX = 200;
+const SNAP_THRESHOLD_PX = 15;
 const SNAP_THRESHOLD_MM = SNAP_THRESHOLD_PX / SCALE;
 
 const STORAGE_KEY = "multi_workspace_panel_arranger_v1";
