@@ -16,7 +16,8 @@ const defaultWorkspace = (name = "Workspace 1") => ({
   panels: [],
   width: 1220,
   height: 2440,
-  spacing: 2,
+  spacing: 3,
+  edgeBandingTypes: ["None"]
 });
 
 export default function WorkspacePanelArranger() {
@@ -66,7 +67,7 @@ export default function WorkspacePanelArranger() {
         x: 3 * ws.width,
         y: 0,
         rotation: 0,
-        edges: { top: false, right: false, bottom: false, left: false }
+        edgeBanding: {}
       },
     ]);
   };
@@ -147,11 +148,27 @@ export default function WorkspacePanelArranger() {
     setHighlightedPanelId(null);
   }, [current]);
 
+  const edgeBandingTotals = {};
+  ws.panels.forEach(panel => {
+    const e = panel.edgeBanding || {};
+    if(e.top && e.top !== "None")
+      edgeBandingTotals[e.top] = (edgeBandingTotals[e.top] || 0) + panel.width;
+    if(e.right && e.right !== "None")
+      edgeBandingTotals[e.right] = (edgeBandingTotals[e.right] || 0) + panel.height;
+    if(e.bottom && e.bottom !== "None")
+      edgeBandingTotals[e.bottom] = (edgeBandingTotals[e.bottom] || 0) + panel.width;
+    if(e.left && e.left !== "None")
+      edgeBandingTotals[e.left] = (edgeBandingTotals[e.left] || 0) + panel.height;
+  });
+
+  const currentBandingTypes = ws.edgeBandingTypes || ["None"];
+
   const [editingWorkspace, setEditingWorkspace] = useState(null);
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
   // 5. Font size (global, but can be made per-workspace)
   const [panelFontSize, setPanelFontSize] = useState(16);
   const [panelSizeSize, setPanelSizeSize] = useState(12);
+  const [newBandingType, setNewBandingType] = useState('');
 
   // For creating panels
   const [newPanelWidth, setNewPanelWidth] = useState("");
@@ -330,6 +347,35 @@ export default function WorkspacePanelArranger() {
         >
           A+
         </button>
+        <strong>Edge Banding Types:</strong>
+  <ul style={{display: "inline-block", margin: 0, padding: 0}}>
+    {(currentBandingTypes).map((type, idx) => (
+      <li key={type} style={{display: "inline", marginRight: 10}}>
+        {type}
+        {idx > 0 && ( // don’t allow removal of the first default types
+          <button style={{marginLeft: 4, color: "red"}}
+                  onClick={() => {
+                    const newList = currentBandingTypes.filter((_, i) => i !== idx);
+                    updateSetting("edgeBandingTypes", newList);
+                  }}>✕</button>
+        )}
+      </li>
+    ))}
+  </ul>
+  <input
+    type="text"
+    style={{width: 120, marginLeft: 8}}
+    placeholder="Add new type"
+    value={newBandingType}
+    onChange={e => setNewBandingType(e.target.value)}
+  />
+  <button onClick={() => {
+    const trimmed = newBandingType.trim();
+    if (trimmed && !currentBandingTypes.includes(trimmed)) {
+      updateSetting("edgeBandingTypes", [...currentBandingTypes, trimmed]);
+      setNewBandingType("");
+    }
+  }}>Add</button>
         </div>
       {/* Workspace display */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: 40 }}>
@@ -380,11 +426,11 @@ export default function WorkspacePanelArranger() {
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Name</th>
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Width (mm)</th>
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Height (mm)</th>
-                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Top</th>
-                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Right</th>
-                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Bottom</th>
-                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Left</th>
-                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Delete Button</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Top EB</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Right EB</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Bottom EB</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Left EB</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Delete Panel</th>
               </tr>
             </thead>
             <tbody>
@@ -408,21 +454,35 @@ export default function WorkspacePanelArranger() {
         <td style={{ border: "1px solid #aaa", padding: "3px 8px", textAlign: "right", color: "black" }}>{panel.width}</td>
         <td style={{ border: "1px solid #aaa", padding: "3px 8px", textAlign: "right", color: "black" }}>{panel.height}</td>
         {["top", "right", "bottom", "left"].map((edge) => (
-          <td key={edge} style={{ textAlign: 'center' }}>
-            <input
-              type="checkbox"
-              checked={panel.edges?.[edge] || false}
-              onChange={e => {
-                const nextPanels = ws.panels.map(p =>
-                  p.id === panel.id
-                    ? { ...p, edges: { ...((p.edges)||{top:false,right:false,bottom:false,left:false}), [edge]: !((p.edges||{})[edge]) } }
-                    : p
-                );
-                updatePanelState(nextPanels);
-              }}
-            />
-          </td>
-        ))}
+  <td key={edge} style={{textAlign: "center"}}>
+    <select
+      style={{width: '96px'}}
+      value={
+        currentBandingTypes.includes(panel.edgeBanding?.[edge])
+          ? panel.edgeBanding?.[edge]
+          : "None"
+      }
+      onChange={e => {
+        const nextPanels = ws.panels.map((p) =>
+          p.id === panel.id
+            ? {
+                ...p,
+                edgeBanding: {
+                  ...((p.edgeBanding) || {}),
+                  [edge]: e.target.value
+                },
+              }
+            : p
+        );
+        updatePanelState(nextPanels);
+      }}
+    >
+      {(currentBandingTypes).map(type => (
+        <option value={type} key={type}>{type}</option>
+      ))}
+    </select>
+  </td>
+))}
         <td style={{ border: "1px solid #aaa", padding: "3px 5px", textAlign: "center" }}>
           <button
             onClick={(e) => {
@@ -456,19 +516,13 @@ export default function WorkspacePanelArranger() {
 </tbody>
           </table>
         </div>
-        <div style={{marginTop: 12, fontWeight: "bold", color: "black"}}>
-  Total Edge Bidding: {
-    ws.panels.reduce((sum, panel) => {
-      const e = panel.edges || { top: false, right: false, bottom: false, left: false };
-      return (
-        sum +
-        (e.top ? panel.width : 0) +
-        (e.right ? panel.height : 0) +
-        (e.bottom ? panel.width : 0) +
-        (e.left ? panel.height : 0)
-      );
-    }, 0)
-  } mm
+        <div style={{ marginTop: 12, fontWeight: "bold", color: "black" }}>
+  Edge Banding Totals:
+  <ul>
+    {Object.entries(edgeBandingTotals).map(([type, sum]) =>
+      <li key={type}>{type}: {sum} mm</li>
+    )}
+  </ul>
 </div>
       </div>
     </div>
