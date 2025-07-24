@@ -426,10 +426,10 @@ export default function WorkspacePanelArranger() {
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Name</th>
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Width (mm)</th>
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Height (mm)</th>
-                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Top EB</th>
-                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Right EB</th>
-                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Bottom EB</th>
-                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Left EB</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Top</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Right</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Bottom</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Left</th>
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Delete Panel</th>
               </tr>
             </thead>
