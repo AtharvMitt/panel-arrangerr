@@ -66,6 +66,7 @@ export default function WorkspacePanelArranger() {
         x: 3 * ws.width,
         y: 0,
         rotation: 0,
+        edges: { top: false, right: false, bottom: false, left: false }
       },
     ]);
   };
@@ -379,13 +380,17 @@ export default function WorkspacePanelArranger() {
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Name</th>
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Width (mm)</th>
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Height (mm)</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Top</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Right</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Bottom</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Left</th>
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Delete Button</th>
               </tr>
             </thead>
             <tbody>
   {ws.panels.length === 0 ? (
     <tr>
-      <td colSpan={4} style={{ textAlign: "center", color: "#aaa", padding: 10 }}>
+      <td colSpan={8} style={{ textAlign: "center", color: "#aaa", padding: 10 }}>
         — No panels —
       </td>
     </tr>
@@ -402,6 +407,22 @@ export default function WorkspacePanelArranger() {
         <td style={{ border: "1px solid #aaa", padding: "3px 8px", color: "black" }}>{panel.name || panel.id}</td>
         <td style={{ border: "1px solid #aaa", padding: "3px 8px", textAlign: "right", color: "black" }}>{panel.width}</td>
         <td style={{ border: "1px solid #aaa", padding: "3px 8px", textAlign: "right", color: "black" }}>{panel.height}</td>
+        {["top", "right", "bottom", "left"].map((edge) => (
+          <td key={edge} style={{ textAlign: 'center' }}>
+            <input
+              type="checkbox"
+              checked={panel.edges?.[edge] || false}
+              onChange={e => {
+                const nextPanels = ws.panels.map(p =>
+                  p.id === panel.id
+                    ? { ...p, edges: { ...((p.edges)||{top:false,right:false,bottom:false,left:false}), [edge]: !((p.edges||{})[edge]) } }
+                    : p
+                );
+                updatePanelState(nextPanels);
+              }}
+            />
+          </td>
+        ))}
         <td style={{ border: "1px solid #aaa", padding: "3px 5px", textAlign: "center" }}>
           <button
             onClick={(e) => {
@@ -435,6 +456,20 @@ export default function WorkspacePanelArranger() {
 </tbody>
           </table>
         </div>
+        <div style={{marginTop: 12, fontWeight: "bold", color: "black"}}>
+  Total Edge Bidding: {
+    ws.panels.reduce((sum, panel) => {
+      const e = panel.edges || { top: false, right: false, bottom: false, left: false };
+      return (
+        sum +
+        (e.top ? panel.width : 0) +
+        (e.right ? panel.height : 0) +
+        (e.bottom ? panel.width : 0) +
+        (e.left ? panel.height : 0)
+      );
+    }, 0)
+  } mm
+</div>
       </div>
     </div>
   );
