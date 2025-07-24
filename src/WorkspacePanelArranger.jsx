@@ -430,7 +430,7 @@ export default function WorkspacePanelArranger() {
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Right</th>
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Bottom</th>
                 <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Left</th>
-                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Delete Panel</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Del</th>
               </tr>
             </thead>
             <tbody>
@@ -456,7 +456,7 @@ export default function WorkspacePanelArranger() {
         {["top", "right", "bottom", "left"].map((edge) => (
   <td key={edge} style={{textAlign: "center"}}>
     <select
-      style={{width: '96px'}}
+      style={{width: '68px', fontSize: 13, padding: '2px'}}
       value={
         currentBandingTypes.includes(panel.edgeBanding?.[edge])
           ? panel.edgeBanding?.[edge]
