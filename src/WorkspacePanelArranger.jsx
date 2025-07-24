@@ -63,7 +63,7 @@ export default function WorkspacePanelArranger() {
         name,
         width: w,
         height: h,
-        x: 2 * w,
+        x: 3 * ws.width,
         y: 0,
         rotation: 0,
       },
@@ -366,7 +366,7 @@ export default function WorkspacePanelArranger() {
 
         {/* --- Panel Table (NEW) --- */}
         <div style={{ minWidth: 250 }}>
-          <h3 style={{ marginBottom: 8 }}>Panels in Current Workspace</h3>
+          <h3 style={{ marginBottom: 8 }}>Panels in {ws.name}</h3>
           <table style={{
             borderCollapse: "collapse",
             width: "100%",
@@ -375,16 +375,17 @@ export default function WorkspacePanelArranger() {
             fontSize: 15
           }}>
             <thead>
-              <tr style={{ background: "black" }}>
-                <th style={{ border: "1px solid #888", padding: "4px 8px" }}>Name</th>
-                <th style={{ border: "1px solid #888", padding: "4px 8px" }}>Width (mm)</th>
-                <th style={{ border: "1px solid #888", padding: "4px 8px" }}>Height (mm)</th>
+              <tr style={{ background: "white" }}>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Name</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Width (mm)</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Height (mm)</th>
+                <th style={{ border: "1px solid #888", padding: "4px 8px", color:"black" }}>Delete Button</th>
               </tr>
             </thead>
             <tbody>
   {ws.panels.length === 0 ? (
     <tr>
-      <td colSpan={3} style={{ textAlign: "center", color: "#aaa", padding: 10 }}>
+      <td colSpan={4} style={{ textAlign: "center", color: "#aaa", padding: 10 }}>
         — No panels —
       </td>
     </tr>
@@ -401,6 +402,33 @@ export default function WorkspacePanelArranger() {
         <td style={{ border: "1px solid #aaa", padding: "3px 8px", color: "black" }}>{panel.name || panel.id}</td>
         <td style={{ border: "1px solid #aaa", padding: "3px 8px", textAlign: "right", color: "black" }}>{panel.width}</td>
         <td style={{ border: "1px solid #aaa", padding: "3px 8px", textAlign: "right", color: "black" }}>{panel.height}</td>
+        <td style={{ border: "1px solid #aaa", padding: "3px 5px", textAlign: "center" }}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent highlighting row
+              deletePanel(panel.id);
+            }}
+            title="Delete panel"
+            style={{
+              background: "#f44336",
+              color: "#fff",
+              fontWeight: "bold",
+              border: "none",
+              borderRadius: "50%",
+              display:"flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 24,
+              height: 24,
+              fontSize: 18,             // Visibly centered "×"
+              padding: 0,
+              lineHeight: 1,
+              cursor: "pointer",
+            }}
+          >
+            ×
+          </button>
+        </td>
       </tr>
     ))
   )}
@@ -591,38 +619,6 @@ function DraggablePanel({
       }}
       title="Double click to rotate"
     >
-      {/* Delete button */}
-      <button
-        style={{
-          position: "absolute",
-          top: 2,
-          right: 2,
-          width: 20,
-          height: 20,
-          borderRadius: "50%",
-          border: "none",
-          background: "#f44336",
-          color: "white",
-          fontWeight: "bold",
-          cursor: "pointer",
-          zIndex: 10,
-          padding: 0,
-          lineHeight: "20px",
-          textAlign: "center",
-        }}
-        onMouseDown={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          deletePanel(panel.id);
-        }}
-        title="Delete panel"
-      >
-        ×
-      </button>
       {/* Width label */}
       <div
         style={{
