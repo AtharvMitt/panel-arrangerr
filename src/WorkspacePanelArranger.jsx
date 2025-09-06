@@ -181,7 +181,7 @@ export default function WorkspacePanelArranger() {
   // UI
   return (
     <div style={{ padding: 20, fontFamily: "Arial, sans-serif" }}>
-      <h2>Workspace Panel Arranger</h2>
+      <h2>Workspace Pane Arranger</h2>
 
       {/* Workspace Tabs */}
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
